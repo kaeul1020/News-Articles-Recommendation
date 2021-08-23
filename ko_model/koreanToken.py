@@ -67,7 +67,7 @@ class PartOfSpeech:
 
     def __init__(self):
         self.api = KhaiiiApi() 
-        self.significant_tags = ['NNG', 'NNP', 'NNB', 'VV', 'VA', 'VX', 'MAG', 'MAJ', 'XSV', 'XSA']
+        self.significant_tags = ['NNG', 'NNP', 'NNB', 'VV', 'VA', 'VX', 'MAG', 'MAJ', 'XSV', 'XSA']                           
 
     def pos_text(self, texts):
         corpus = []
@@ -151,10 +151,13 @@ class Stemming:
 
 
 # Stopwords 불용어 제거
+# 'NNG', 'NNP', 'NNB', 'VV', 'VA', 'VX', 'MAG', 'MAJ', 'XSV', 'XSA'
+ # 일반명사, 고유명사, 의존명사, 동사, 형용사, 보조용언, 일반부사, 접속부사, 동사파생접미사, 형용사파생접미사
+
 class Stopwords:
 
     def __init__(self):
-        self.stopwords = ['데/NNB', '좀/MAG', '수/NNB', '등/NNB']
+        self.stopwords = ['데/NNB', '좀/MAG', '수/NNB', '등/NNB', '시/NNG', '분/NNG', '초/NNG', '것/NNB', '있다/VV', '일/NNG']
 
     def remove_stopword_text(self, text):
         corpus = []
@@ -162,8 +165,10 @@ class Stopwords:
             modi_sent = []
             for word in sent.split(' '):
                 if word not in self.stopwords:
-                    modi_sent.append(word)
+                    modi_sent.append(word.split('/')[0])
+
             corpus.append(' '.join(modi_sent))
+
         return corpus
 
 

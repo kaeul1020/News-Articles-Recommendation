@@ -47,7 +47,7 @@ class Process:
 class Cluster:
     def __init__(self, Str):
         self.series_data = pd.Series(Str)
-        self.num_clusters = 3  # 3개의 그룹으로 분류
+        self.num_clusters = 2  # 2개의 그룹으로 분류
         self.cluster = []
 
     def division(self):
