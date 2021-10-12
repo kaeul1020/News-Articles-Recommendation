@@ -1,13 +1,13 @@
 from recommend_engine import Process, Cluster, Sentiment, Content
 import pandas as pd
-from konlpy.tag import Okt
+#from konlpy.tag import Okt
 
 # 이 파일을 실행하세요
 
 turn = 10  # 이것이 사용자가 본 뉴스 개수
 
 # 사용자 클러스터화
-data = pd.read_excel('news_user1.xlsx')
+data = pd.read_excel('news_user1.xlsx', engine='openpyxl')
 data = data[data['valid']==1]
 lines = data['text'].tolist()
 
@@ -115,7 +115,7 @@ else:
 
     #-----------------------------------------------------------------
     # 새로운 뉴스, 추천할 뉴스 골라내기
-    data2 = pd.read_excel('news_user1.xlsx')
+    data2 = pd.read_excel('news_user1.xlsx', engine='openpyxl')
     data = data[data['valid']==0]
     lines2 = data2['text'].tolist()
 
