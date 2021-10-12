@@ -129,10 +129,8 @@ else:
     corpus2, docs2, dictionary2 = Sent.Corpus()
 
     pol=[TextBlob(' '.join(df_text.iloc[i,0])).sentiment.polarity for i in range(df_text.shape[0])]
-    sub=[TextBlob(' '.join(df_text.iloc[i,0])).sentiment.subjectivity for i in range(df_text.shape[0])]
-    df_text['pol']=pol
-    df_text['sub']=sub
 
+    df_text['pol']=pol
 
     def format_topics_sentences(num, ldamodel):
         Topic_num_ls = []
@@ -167,15 +165,13 @@ else:
 
 
     sentiment={elem: pd.DataFrame for elem in UniqueNames}
-    subjectivit={elem: pd.DataFrame for elem in UniqueNames}
+
     w1=0.8 # Topic modelling weight
     w2=0.2 # Sentiment score weight
     for i in range(len(UniqueNames)):
-        sentiment[i] = cosine_similarity(np.array(df_text.iloc[:, 2]).reshape(-1, 1), np.array([polaritycluster[i]]).reshape(-1, 1))
-        subjectivit[i] = cosine_similarity(np.array(df_text.iloc[:, 2]).reshape(-1, 1), np.array([subjectivitycluster[i]]).reshape(-1, 1))
+        sentiment[i] = cosine_similarity(np.array(df_text.iloc[:, 1]).reshape(-1, 1), np.array([polaritycluster[i]]).reshape(-1, 1))
         
         sentiment[i] = np.array(sentiment[i]).flatten().tolist()
-        subjectivit[i] = np.array(subjectivit[i]).flatten().tolist()
         
         a = []
         b = []
@@ -183,11 +179,10 @@ else:
             topic = list(model.docs[j].get_topics(top_n=1)[0])
             if topic[0] == i:
                 a.append(sentiment[i][j])
-                b.append(subjectivit[i][j])
 
         df_topic_sents_keywords[i]['Polarity'] = a
-        df_topic_sents_keywords[i]['Subjectivity'] = b
-        df_topic_sents_keywords[i]['Metric']=w1*df_topic_sents_keywords[i]['Diff']+w2/2*(df_topic_sents_keywords[i]['Polarity']+df_topic_sents_keywords[i]['Subjectivity'])
+
+        df_topic_sents_keywords[i]['Metric']=w1*df_topic_sents_keywords[i]['Diff']+w2/2*(df_topic_sents_keywords[i]['Polarity'])
 
 
     print(df_topic_sents_keywords[0])
@@ -206,7 +201,7 @@ else:
         topic = list(model.docs[j].get_topics(top_n=1)[0])
         for i in range(len(UniqueNames)):  
             if topic[0] == i:
-                rec=np.append(rec, df_topic_sents_keywords[i].iloc[count,6])
+                rec=np.append(rec, df_topic_sents_keywords[i].iloc[count,5])
                 count += 1
 
         recommender=recommender.append(pd.Series(np.argmax(rec)),ignore_index=True)
