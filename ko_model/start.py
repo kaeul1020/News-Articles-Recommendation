@@ -60,14 +60,15 @@ else:
         dictionarycluster[key]=Dictionary(docscluster[key])
 
 
-    # polarity(긍정적/부정적 감정 : -1~1 사이의 값), subjectivity(객관성/주관성 : 0~1 사이의 값)
-    from textblob import TextBlob
+    # polarity(긍정적/부정적 감정 : -1~1 사이의 값) => TODO:0~1로 바꾸고싶어!
+    #from textblob import TextBlob
 
     polaritycluster={elem : pd.DataFrame for elem in UniqueNames}
-    subjectivitycluster={elem : pd.DataFrame for elem in UniqueNames}
+
+    import  random
     for i in DataFrameDict.keys():
-        polaritycluster[i]=TextBlob(' '.join(DataFrameDict[i]['texts'].astype('str'))).sentiment.polarity
-        subjectivitycluster[i]=TextBlob(' '.join(DataFrameDict[i]['texts'].astype('str'))).sentiment.subjectivity
+        #원래 이부분에 사용자 선호도가 들어가야한다.
+        polaritycluster[i]=random.random();
 
 
     # 사용자 데이터프레임 출력
@@ -128,7 +129,7 @@ else:
     Sent2 = Sentiment(df_text['text'])
     corpus2, docs2, dictionary2 = Sent.Corpus()
 
-    pol=[TextBlob(' '.join(df_text.iloc[i,0])).sentiment.polarity for i in range(df_text.shape[0])]
+    pol=[random.random() for i in range(df_text.shape[0])]
 
     df_text['pol']=pol
 
@@ -158,7 +159,6 @@ else:
 
     # The percent contribution of each topic model considered as metric to assign topic score
     df_topic_sents_keywords={elem : pd.DataFrame for elem in UniqueNames}
-
     for i in range(len(UniqueNames)):
         df_topic_sents_keywords[i] = format_topics_sentences(i, model)
         df_topic_sents_keywords[i]['Diff']= df_topic_sents_keywords[i]['Perc_Contribution']-np.mean(df_topic_sents_keywords[i]['Perc_Contribution'])
@@ -170,11 +170,10 @@ else:
     w2=0.2 # Sentiment score weight
     for i in range(len(UniqueNames)):
         sentiment[i] = cosine_similarity(np.array(df_text.iloc[:, 1]).reshape(-1, 1), np.array([polaritycluster[i]]).reshape(-1, 1))
-        
+
         sentiment[i] = np.array(sentiment[i]).flatten().tolist()
-        
+
         a = []
-        b = []
         for j in range(len(model.docs)):
             topic = list(model.docs[j].get_topics(top_n=1)[0])
             if topic[0] == i:
@@ -182,10 +181,11 @@ else:
 
         df_topic_sents_keywords[i]['Polarity'] = a
 
-        df_topic_sents_keywords[i]['Metric']=w1*df_topic_sents_keywords[i]['Diff']+w2/2*(df_topic_sents_keywords[i]['Polarity'])
+        df_topic_sents_keywords[i]['Metric']=w1*df_topic_sents_keywords[i]['Diff']+w2*(df_topic_sents_keywords[i]['Polarity'])
 
-
-    print(df_topic_sents_keywords[0])
+    print("df_topic_sents_keywords[0] : ")
+    print(+df_topic_sents_keywords[0])
+    print("df_topic_sents_keywords[1] : ")
     print(df_topic_sents_keywords[1])
 
 
@@ -193,24 +193,24 @@ else:
     recommend=pd.DataFrame()
     recommender=pd.DataFrame()
     metric_value=pd.DataFrame()
-    rec=np.array([])
 
+    rec = np.array([])
+    for i in range(len(model.docs)):
 
-    for j in range(len(model.docs)):
         count = 0
-        topic = list(model.docs[j].get_topics(top_n=1)[0])
-        for i in range(len(UniqueNames)):  
-            if topic[0] == i:
-                rec=np.append(rec, df_topic_sents_keywords[i].iloc[count,5])
+        topic = list(model.docs[i].get_topics()[0])
+        for j in range(len(UniqueNames)):
+            if topic[0] == j:
+                rec=np.append(rec, df_topic_sents_keywords[j].iloc[i,6])
                 count += 1
 
         recommender=recommender.append(pd.Series(np.argmax(rec)),ignore_index=True)
         metric_value=metric_value.append(pd.Series(np.amax(rec)),ignore_index=True)
-        rec=np.array([])
+        rec = np.array([])
 
-    recommend['cluster']=recommender
     recommend['metric']=metric_value
     recommend['article_text']=df_text['text']
+    recommend.rename(columns={0:'cluster'},inplace=True)
     recommend.to_csv('recommend.csv',index=None)
 
 
